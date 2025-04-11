@@ -1,3 +1,4 @@
-[submodule "sk-mmwave-ros"]
-	path = sk-mmwave-ros
-	url = https://github.com/arlaptiev/sk-mmwave-ros.git
+
+[submodule "sk_mmwave_ros"]
+	path = sk_mmwave_ros
+	url = https://github.com/arlaptiev/sk_mmwave_ros.git
