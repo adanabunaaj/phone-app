@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A0A08F5F2DA9885A00359BE9 /* ROSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A08F5E2DA9885100359BE9 /* ROSClient.swift */; };
+		A0A08F632DA98ECF00359BE9 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A0A08F622DA98ECF00359BE9 /* Starscream */; };
 		D25977EB2D75066C0023D23B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D25977EA2D75066C0023D23B /* AppDelegate.swift */; };
 		D25977ED2D75066C0023D23B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D25977EC2D75066C0023D23B /* SceneDelegate.swift */; };
 		D25977EF2D75066C0023D23B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D25977EE2D75066C0023D23B /* ViewController.swift */; };
@@ -36,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A0A08F5E2DA9885100359BE9 /* ROSClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ROSClient.swift; sourceTree = "<group>"; };
 		D25977E72D75066C0023D23B /* WorldTracking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WorldTracking.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D25977EA2D75066C0023D23B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D25977EC2D75066C0023D23B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -56,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0A08F632DA98ECF00359BE9 /* Starscream in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,12 +80,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A0A08F612DA98ECF00359BE9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D25977DE2D75066C0023D23B = {
 			isa = PBXGroup;
 			children = (
 				D25977E92D75066C0023D23B /* WorldTracking */,
 				D25978002D75066D0023D23B /* WorldTrackingTests */,
 				D259780A2D75066D0023D23B /* WorldTrackingUITests */,
+				A0A08F612DA98ECF00359BE9 /* Frameworks */,
 				D25977E82D75066C0023D23B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -100,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				D25977EA2D75066C0023D23B /* AppDelegate.swift */,
+				A0A08F5E2DA9885100359BE9 /* ROSClient.swift */,
 				D25977EC2D75066C0023D23B /* SceneDelegate.swift */,
 				D25977EE2D75066C0023D23B /* ViewController.swift */,
 				D25977F02D75066C0023D23B /* Main.storyboard */,
@@ -215,6 +228,9 @@
 				Base,
 			);
 			mainGroup = D25977DE2D75066C0023D23B;
+			packageReferences = (
+				A0A08F602DA989CF00359BE9 /* XCRemoteSwiftPackageReference "Starscream" */,
+			);
 			productRefGroup = D25977E82D75066C0023D23B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -259,6 +275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D25977EF2D75066C0023D23B /* ViewController.swift in Sources */,
+				A0A08F5F2DA9885A00359BE9 /* ROSClient.swift in Sources */,
 				D25977EB2D75066C0023D23B /* AppDelegate.swift in Sources */,
 				D25977ED2D75066C0023D23B /* SceneDelegate.swift in Sources */,
 			);
@@ -442,7 +459,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = M5M2KCRPJ2;
+				DEVELOPMENT_TEAM = 7MGD65GJ58;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorldTracking/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Need camera for ARKit";
@@ -456,7 +473,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = mllam.WorldTracking;
+				PRODUCT_BUNDLE_IDENTIFIER = fatemaz.WorldTracking;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -471,7 +488,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = M5M2KCRPJ2;
+				DEVELOPMENT_TEAM = 7MGD65GJ58;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorldTracking/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Need camera for ARKit";
@@ -485,7 +502,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = mllam.WorldTracking;
+				PRODUCT_BUNDLE_IDENTIFIER = fatemaz.WorldTracking;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -609,6 +626,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A0A08F602DA989CF00359BE9 /* XCRemoteSwiftPackageReference "Starscream" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/daltoniam/Starscream.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.8;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A0A08F622DA98ECF00359BE9 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0A08F602DA989CF00359BE9 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D25977DF2D75066C0023D23B /* Project object */;
 }

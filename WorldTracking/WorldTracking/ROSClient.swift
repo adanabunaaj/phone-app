@@ -8,46 +8,37 @@
 //noetic ros
 
 import Foundation
-import Starscream
+import Network
 
-class ROSClient: WebSocketDelegate {
-    func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
-        <#code#>
+func startRepeatingUDPSender() {
+    Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+        sendUDP(message: "Hello from UIKit!", host: "192.168.41.205", port: 5005)
     }
-    
-    var socket: WebSocket!
+}
 
-    init() {
-        var request = URLRequest(url: URL(string: "ws://<ROS_IP>:9090")!)
-        socket = WebSocket(request: request)
-        socket.delegate = self
-        socket.connect()
-    }
 
-    func sendMessage(topic: String, data: [String: Any]) {
-        let message: [String: Any] = [
-            "op": "publish",
-            "topic": topic,
-            "msg": data
-        ]
+func sendUDP(message: String, host: String, port: UInt16) {
+    let connection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: .udp)
 
-        if let jsonData = try? JSONSerialization.data(withJSONObject: message) {
-            socket.write(data: jsonData)
-        }
-    }
-
-    func didReceive(event: WebSocketEvent, client: WebSocket) {
-        switch event {
-        case .connected(_):
-            print("Connected to ROS bridge!")
-        case .disconnected(let reason, let code):
-            print("Disconnected: \(reason) with code: \(code)")
-        case .text(let string):
-            print("Received text: \(string)")
-        case .binary(let data):
-            print("Received binary: \(data.count) bytes")
+    connection.stateUpdateHandler = { newState in
+        switch newState {
+        case .ready:
+            print("Connection ready")
+            let data = message.data(using: .utf8)!
+            connection.send(content: data, completion: .contentProcessed({ error in
+                if let error = error {
+                    print("Send error: \(error)")
+                } else {
+                    print("Message sent")
+                }
+                connection.cancel()
+            }))
+        case .failed(let error):
+            print("Connection failed: \(error)")
         default:
             break
         }
     }
+
+    connection.start(queue: .global())
 }

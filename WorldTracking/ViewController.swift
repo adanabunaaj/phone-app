@@ -12,9 +12,11 @@ class ViewController: UIViewController, ARSessionDelegate {
 
     var sceneView: ARSCNView!
     var logButton: UIButton!
+    var captureButton: UIButton!
     var positionLabel: UILabel!
     var timestampLabel: UILabel! // New label for timestamp
     var isLogging = false
+    var isCapturing = false
 //    var locationData: [(position: simd_float4x4, timestamp: String)] = []
     var locationData: [(position: simd_float4x4, timestamp: Double)] = []
 
@@ -79,6 +81,16 @@ class ViewController: UIViewController, ARSessionDelegate {
         logButton.frame = CGRect(x: 20, y: 50, width: 150, height: 50)
         logButton.addTarget(self, action: #selector(toggleLogging), for: .touchUpInside)
         view.addSubview(logButton)
+        
+        // Capture Button
+        captureButton = UIButton(type: .system)
+        captureButton.setTitle("Capture", for: .normal)
+        captureButton.backgroundColor = .systemBlue
+        captureButton.setTitleColor(.white, for: .normal)
+        captureButton.layer.cornerRadius = 10
+        captureButton.frame = CGRect(x: 200, y: 50, width: 150, height: 50)
+        captureButton.addTarget(self, action: #selector(toggleCapture), for: .touchUpInside)
+        view.addSubview(captureButton)
 
         // XYZ Position Label
         positionLabel = UILabel()
@@ -112,6 +124,13 @@ class ViewController: UIViewController, ARSessionDelegate {
         if !isLogging {
             saveLocationData()
         }
+    }
+    
+    @objc func toggleCapture() {
+        isCapturing.toggle()
+        captureButton.setTitle(isCapturing ? "Stop Capture" : "Start Capture", for: .normal)
+        captureButton.backgroundColor = isCapturing ? .systemRed : .systemBlue
+
     }
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
@@ -153,6 +172,35 @@ class ViewController: UIViewController, ARSessionDelegate {
 //            DispatchQueue.main.async {
 //                self.timestampLabel.text = "Timestamp: \(estTimestamp)"
 
+        }
+        
+        if isCapturing {
+            let timestamp = Date()
+            let nanosecondTimestamp = timestamp.timeIntervalSince1970 * 1_000_000_000
+            print("nanosecondTimestamp: \(nanosecondTimestamp)")
+
+            // Step 1: Convert to seconds
+            let timestampInSeconds = nanosecondTimestamp / 1_000_000_000
+
+            // Step 2: Create Date object from seconds
+            let date = Date(timeIntervalSince1970: timestampInSeconds)
+
+            // Step 3: Format to EST time
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSSSSS"
+            formatter.timeZone = TimeZone(identifier: "America/New_York")
+            let formattedDate = formatter.string(from: date)
+
+            print("Formatted EST Time: \(formattedDate)")
+            
+            print("Logged Position: \(position.x), \(position.y), \(position.z)")
+            print("Quaternion: (\(quaternion.vector.x), \(quaternion.vector.y), \(quaternion.vector.z), \(quaternion.vector.w))")
+            
+            var host_ip = "10.31.159.92" //"192.168.41.205"
+            sendUDP(message: "Formatted EST Time: \(formattedDate)", host: host_ip, port: 5005)
+            sendUDP(message: "Logged Position: \(position.x), \(position.y), \(position.z)", host: host_ip, port: 5005)
+            sendUDP(message: "Quaternion: (\(quaternion.vector.x), \(quaternion.vector.y), \(quaternion.vector.z), \(quaternion.vector.w))", host: host_ip, port: 5005)
+            
         }
     }
         
