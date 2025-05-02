@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 W, H = 256, 192  
 
 # 1. Load the flat float32 array
-depth = np.fromfile("captures/sample_capture/depth.bin", dtype=np.float32)
+depth = np.fromfile("captures/sample_capture/depth-30.bin", dtype=np.float32)
 
 # 2. Reshape into (H, W)
 depth = depth.reshape((H, W))
