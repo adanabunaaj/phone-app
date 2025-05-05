@@ -128,6 +128,10 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     @objc func toggleCapture() {
         isCapturing.toggle()
+        if isCapturing {
+            let host_ip = "192.168.41.163" //"10.31.159.92" //"192.168.41.205"
+            sendUDP(message: "RADAR STARTING DATA CAPTURE NOW", host: host_ip, port: 5005)
+        }
         captureButton.setTitle(isCapturing ? "Stop Capture" : "Start Capture", for: .normal)
         captureButton.backgroundColor = isCapturing ? .systemRed : .systemBlue
 
@@ -196,7 +200,7 @@ class ViewController: UIViewController, ARSessionDelegate {
             print("Logged Position: \(position.x), \(position.y), \(position.z)")
             print("Quaternion: (\(quaternion.vector.x), \(quaternion.vector.y), \(quaternion.vector.z), \(quaternion.vector.w))")
             
-            var host_ip = "10.31.159.92" //"192.168.41.205"
+            var host_ip = "192.168.41.188"//"10.31.159.92" //"192.168.41.205"
             sendUDP(message: "Formatted EST Time: \(formattedDate)", host: host_ip, port: 5005)
             sendUDP(message: "Logged Position: \(position.x), \(position.y), \(position.z)", host: host_ip, port: 5005)
             sendUDP(message: "Quaternion: (\(quaternion.vector.x), \(quaternion.vector.y), \(quaternion.vector.z), \(quaternion.vector.w))", host: host_ip, port: 5005)
