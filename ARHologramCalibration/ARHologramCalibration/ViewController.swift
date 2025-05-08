@@ -54,7 +54,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func addHologram(){
         //create a sphere gerometry with a small radius (5cm)
-        let sphereGeometry = SCNSphere(radius: 0.05)
+        let sphereGeometry = SCNSphere(radius: 0.01)
         sphereGeometry.firstMaterial?.diffuse.contents = UIColor.red
         
         //create a node with that geometry

@@ -1,9 +1,23 @@
-# macOS
+### macOS ###
 .DS_Store
 
-# Xcode
-DerivedData/
+### Xcode / iOS ###
 build/
-
-# If you're using CocoaPods
+DerivedData/
+*.xcworkspace
+*.xcuserdata/
+*.xcuserstate
+# SwiftPM
+.build/
+.swiftpm/
+# CocoaPods / Carthage
 Pods/
+Carthage/
+
+### Python ###
+venv/
+__pycache__/
+*.py[cod]
+
+### Misc ###
+*.log
