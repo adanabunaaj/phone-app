@@ -20,7 +20,7 @@ class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDele
     var currentLocation: CLLocation?
 
     // TCP server config
-    let tcpHost = "10.31.128.25"    // Replace with computer IP adress
+    let tcpHost = "192.168.41.163"//"10.31.128.25"    // Replace with computer IP adress
     let tcpPort: UInt16 = 5005
 
     override func viewDidLoad() {
