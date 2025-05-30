@@ -14,13 +14,16 @@ import Network
 class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDelegate {
     //IBOutlets
     @IBOutlet weak var arView: ARSCNView!
+    
+    var listener: NWListener?
 
     //Properties
     let locationManager = CLLocationManager()
     var currentLocation: CLLocation?
+    private var tcpConnection: NWConnection?
 
     // TCP server config
-    let tcpHost = "192.168.41.163"//"10.31.128.25"    // Replace with computer IP adress
+    let tcpHost =  "192.168.41.148"//"192.168.41.178"//"10.31.128.25" //"192.168.41.163"//"10.31.128.25"    // Replace with computer IP adress
     let tcpPort: UInt16 = 5005
 
     override func viewDidLoad() {
@@ -36,7 +39,51 @@ class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDele
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
+        
+        //UDP Listener
+        startUDPListener(on: 9999)
     }
+    
+    //UDP Listener
+    func startUDPListener(on port: UInt16) {
+            do {
+                let params = NWParameters.udp
+                listener = try NWListener(using: params, on: NWEndpoint.Port(rawValue: port)!)
+                
+                listener?.newConnectionHandler = { connection in
+                    connection.start(queue: .main)
+                    self.receive(on: connection)
+                }
+                
+                listener?.start(queue: .main)
+                print("Listening on UDP port \(port)")
+            } catch {
+                print("Failed to create listener: \(error)")
+            }
+        }
+
+        func receive(on connection: NWConnection) {
+            connection.receiveMessage { (data, context, isComplete, error) in
+                if let data = data, !data.isEmpty {
+                    let message = String(decoding: data, as: UTF8.self)
+                    print("Received data: \(message)")
+                    if message == "TRUE" {
+                        let alert = UIAlertController(title: "Box is full", message: nil, preferredStyle: .alert)
+                        alert.addAction(.init(title: "OK", style: .default))
+                        self.present(alert, animated: true)
+                    } else {
+                        let alert = UIAlertController(title: "Box is empty", message: nil, preferredStyle: .alert)
+                        alert.addAction(.init(title: "OK", style: .default))
+                        self.present(alert, animated: true)
+                    }
+                }
+                if error == nil {
+                    self.receive(on: connection) // Keep receiving
+                } else {
+                    print("Error receiving data: \(String(describing: error))")
+                }
+            }
+        }
 
     //Capture Action
     @IBAction func capturePressed(_ sender: UIButton) {
@@ -61,6 +108,23 @@ class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDele
         let timestamp = frame.timestamp
 
         // 4️⃣ Location
+        
+        let cameraTransform = frame.camera.transform
+        
+        //Extract Camera position (x,y,z)
+        let cameraPosition = [
+            cameraTransform.columns.3.x,
+            cameraTransform.columns.3.y,
+            cameraTransform.columns.3.z
+        ]
+        
+        // Extract orientation as 3x3 rotation matrix
+        let cameraOrientation = [
+            [cameraTransform.columns.0.x, cameraTransform.columns.0.y, cameraTransform.columns.0.z],
+            [cameraTransform.columns.1.x, cameraTransform.columns.1.y, cameraTransform.columns.1.z],
+            [cameraTransform.columns.2.x, cameraTransform.columns.2.y, cameraTransform.columns.2.z]
+        ]
+        
         let lat = currentLocation?.coordinate.latitude
         let lon = currentLocation?.coordinate.longitude
 
@@ -90,7 +154,9 @@ class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDele
                 [intrinsics[2,0], intrinsics[2,1], intrinsics[2,2]]
             ],
             "timestamp": timestamp,
-            "location": ["lat": lat ?? 0, "lon": lon ?? 0]
+            "location": ["lat": lat ?? 0, "lon": lon ?? 0],
+            "camera_position": cameraPosition,
+            "camera_orientation": cameraOrientation
         ]
 
         // 8️⃣ Build JSON packet
@@ -103,9 +169,15 @@ class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDele
             packet.append(0x0A)  // newline
 
             // 9️⃣ Send via Network.framework
+            print("Preparing to connect to \(tcpHost):\(tcpPort)…")
             sendWithNetworkFramework(data: packet,
                                      host: tcpHost,
                                      port: tcpPort)
+            
+            // send udp message here
+            
+            //sendUDP(message: "RADAR STARTING DATA CAPTURE NOW", host: tcpHost, port: 5006)
+            
         } catch {
             print("Failed to serialize JSON:", error)
         }
@@ -113,26 +185,60 @@ class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDele
 
     //Network.framework Sender using TCP connection
     func sendWithNetworkFramework(data: Data, host: String, port: UInt16) {
+        var success = false
         let nwHost = NWEndpoint.Host(host)
         let nwPort = NWEndpoint.Port(rawValue: port)!
         let connection = NWConnection(host: nwHost, port: nwPort, using: .tcp)
+        self.tcpConnection = connection
+        print("NWConnection created: \(connection)")
 
         connection.stateUpdateHandler = { state in
             switch state {
+            case .setup:
+                print("Setup complete.")
+            case .waiting(let error):
+                print("Waiting (backoff):", error)
+            case .preparing:
+                print("Preparing connection…")
             case .ready:
+                print("Connection ready—sending \(data.count) bytes.")
                 connection.send(content: data, completion: .contentProcessed { error in
                     if let e = error {
                         print("❌ Network send error:", e)
                     } else {
                         print("✅ Sent \(data.count) bytes to \(host):\(port)")
                     }
-                    connection.cancel()
+                    //connection.cancel()
                 })
+                
+                /*connection.receiveMessage { (data, context, isComplete, error) in
+                                            if let data = data, let message = String(data: data, encoding: .utf8) {
+                                                print("Received response: \(message)")
+                                                if message == "TRUE" {
+                                                    success = true
+                                                    let alert = UIAlertController(title: "Box is full", message: nil, preferredStyle: .alert)
+                                                    alert.addAction(.init(title: "OK", style: .default))
+                                                    self.present(alert, animated: true)
+                                                } else {
+                                                    success = false
+                                                    let alert = UIAlertController(title: "Box is empty", message: nil, preferredStyle: .alert)
+                                                    alert.addAction(.init(title: "OK", style: .default))
+                                                    self.present(alert, animated: true)
+                                                }
+                                            } else if let error = error {
+                                                print("Receive error: \(error)")
+                                            } else {
+                                                print("No data received")
+                                            }
+                                            connection.cancel()
+                                        }*/
 
             case .failed(let error):
                 print("❌ Connection failed:", error)
                 connection.cancel()
 
+            case .cancelled:
+                print("Connection cancelled.")
             default:
                 break
             }
@@ -140,6 +246,52 @@ class ViewController: UIViewController, ARSessionDelegate, CLLocationManagerDele
 
         connection.start(queue: .global(qos: .utility))
     }
+    
+    
+    
+    func sendUDP(message: String, host: String, port: UInt16) {
+        let connection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: .udp)
+            connection.stateUpdateHandler = { newState in
+                switch newState {
+                case .ready:
+                    print("Connection ready UDP")
+                    let data = message.data(using: .utf8)!
+                    connection.send(content: data, completion: .contentProcessed({ error in
+                        if let error = error {
+                            print("Send error: \(error)")
+                        } else {
+                            print("Message sent UDP")
+                            // Now wait for a response
+                            connection.receiveMessage { (data, context, isComplete, error) in
+                                if let data = data, let message = String(data: data, encoding: .utf8) {
+                                    print("Received response: \(message)")
+                                    if message == "TRUE" {
+                                        let alert = UIAlertController(title: "Box is full", message: nil, preferredStyle: .alert)
+                                        alert.addAction(.init(title: "OK", style: .default))
+                                        self.present(alert, animated: true)
+                                    } else {
+                                        let alert = UIAlertController(title: "Box is empty", message: nil, preferredStyle: .alert)
+                                        alert.addAction(.init(title: "OK", style: .default))
+                                        self.present(alert, animated: true)
+                                    }
+                                } else if let error = error {
+                                    print("Receive error: \(error)")
+                                } else {
+                                    print("No data received")
+                                }
+                                connection.cancel()
+                            }
+                        }
+                    }))
+                case .failed(let error):
+                    print("Connection failed: \(error)")
+                default:
+                    break
+                }
+            }
+
+            connection.start(queue: .global())
+        }
 
     // Local Saving Helper Function
     func capturesDirectoryURL() -> URL {
